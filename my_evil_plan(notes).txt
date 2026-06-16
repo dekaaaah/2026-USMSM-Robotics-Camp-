@@ -1,0 +1,58 @@
+Aruco:
+
+Previous goal: Make a program capable of recognizing aruco codes, and displaying how far/how oriented the code is in perspective to the camera.
+
+Current Requirements:
+CV Program displays live video, check
+Program is capable of identifying aruco codes at various orientations, check
+Once orientation is recognized, send commands to the robot in order to make according adjustments.
+
+Calibration is specific TO THE DEVICE. In theory, whoever is reading this is going to need to recalibrate. Ill attach code to do so, but there's a good tutorial by outofthebots3122 on Youtube.
+Hopefully, you'll just be able to get somewhat good results via the code I have sent though. Laptop cameras are similar enough to where it'll work regardless.
+
+Calibration worked! The code is very functional
+Calibration matrix:
+[[330.9382756    0.         307.85826339]
+ [  0.         326.26194236 210.58270927]
+ [  0.           0.           1.        ]]
+Distortion:  [[ 0.2144574  -0.49699611 -0.00350917 -0.018399    0.27845063]]
+I'm going to retry this using better photos. Hopefully different values appear.
+
+Calibration 2:
+Calibration matrix:
+[[373.98441373   0.         298.99183683]
+ [  0.         372.94015881 235.8895008 ]
+ [  0.           0.           1.        ]]
+Distortion:  [[-1.60296539e-01  2.46514309e+00  2.68684106e-03 -2.06725214e-02
+  -1.01540308e+01]]
+The first calibration was actually better. The idea here is that the distortion values are much lower, which for a webcam, makes the most sense.
+The code attached should work with the correct libraries and directories. Test with the preset distortion values I set first, if the screen has a very intense fisheye, re-calibrate using the youtube video talked about previously.
+
+
+Implementation with the Rover
+The idea: Have the rover look around, detect whenever the tag is in view, and when it is, have it adjust itself accordingly.
+Roll is going to be the most important axis of rotation for us. Roll is how much the code is rotated left or right when its facing away from a wall. Roll in theory will be able to tell us what angle we are seeing it at, once we put it in the center of the screen.
+
+The idea:
+Have a "scanning" mode. Have the rover either spin around or move a little to find a tag. Then, once a tag is found, use offset info to center the code in respect to the camera. Next, use roll information to have it look at the code facing straight ahead. Finally use distance info to get to a specific point away from the code.
+Note: Roll may or may not be needed. It is most needed if we need to look at the code from a specific angle.
+
+IMPORTANT THING TO NOTE:
+You will have to change the OpenCV Input for all code. I have 2 ideas as to how to do this.
+1. Make all the code work through the ESP32 and rover instead of communicating to a laptop. This MIGHT work, but will also most likely run much laggier. For Aruco codes, we want relatively good latency and video footage, so this may not be optimal. It will be easier to work with for OpenCV however, and less annoying message sends.
+2 (My suggestion). Have OpenCV use the web server, then send information about where to go through socket, to the ESP32. Slightly more complicated in the short run, however, makes the most sense.
+
+
+How to program the robot:
+Have an initial, "scanning phase"
+Once a code is found, you could even program it to a specific ID, then have it rotate either left or right depending on the offset, until it is centered.
+Have the robot move towards the code until it is a specific distance away, then repeat with a scanning mode again
+Have the code mark down the completed IDs. If an ID has already been went to, have the robot skip over it.
+
+ESP32CAM Calibration:
+Calibration matrix:
+[[350.16319965   0.         316.64264765]
+ [  0.         348.4274522  234.23609732]
+ [  0.           0.           1.        ]]
+Distortion:  [[-0.30508824  0.9254313   0.00162813  0.00298175 -1.1003761 ]]
+THIS IS WRONG
